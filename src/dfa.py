@@ -1,4 +1,5 @@
-from graph_tool.all import *
+from graph_tool import Graph
+from graph_tool.draw import graph_draw
 
 class DFA:
     def __init__(self, states, alphabet, delta, initial_state, final_states):
@@ -41,8 +42,10 @@ class DFA:
             g,
             vertex_text=g.vertex_index,
             edge_text=eprop_dict,
-            vertex_size=50,
+            vertex_size=40,
             vertex_fill_color=vprop_dict,
+            adjust_aspect=False,
+            output_size=(1000,1000),
             output=file_out
         )
 
@@ -62,3 +65,4 @@ if __name__ == "__main__":
     print(f"d {d.verdict(input_1)}s the string 111")
     print(f"d {d.verdict(input_2)}s the string 000")
     d.graph("../output/test.png")
+    
