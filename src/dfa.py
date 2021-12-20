@@ -22,23 +22,30 @@ def epsilon_closure(state_set, delta):
         return state_set
     return epsilon_closure(state_set.union(eps_set), delta)
 
-def reduce_dfa(full_dfa):
-    delta_range = set()
-    for state in full_dfa.states:
+def connected_to_initial(full_dfa):
+    connected_to_init = [full_dfa.initial_state]
+    to_check = [full_dfa.delta[full_dfa.initial_state][symbol] for symbol in full_dfa.alphabet]
+    while len(to_check) > 0:
+        check = to_check.pop()
         for symbol in full_dfa.alphabet:
-            delta_range.add(full_dfa.delta[state][symbol])
-    no_in_transitions = set(full_dfa.states).difference(delta_range)
-    if full_dfa.initial_state in no_in_transitions:
-        no_in_transitions.remove(full_dfa.initial_state)
-        delta_range.add(full_dfa.initial_state)
-    if len(no_in_transitions) == 0:
+            next_state = full_dfa.delta[check][symbol]
+            if next_state not in connected_to_init:
+                connected_to_init.append(next_state)
+                if next_state not in to_check:
+                    to_check.append(next_state)
+    return connected_to_init
+
+def reduce_dfa(full_dfa):
+    delta_range = connected_to_initial(full_dfa)
+    if len(delta_range) == len(full_dfa.states):
         return full_dfa
     new_delta = full_dfa.delta
     new_final_states = full_dfa.final_states
-    for state in no_in_transitions:
-        del(new_delta[state])
-        if state in new_final_states:
-            new_final_states.remove(state)
+    for state in full_dfa.states:
+        if state not in delta_range:
+            del(new_delta[state])
+            if state in new_final_states:
+                new_final_states.remove(state)
     new_dfa = DFA(delta_range, full_dfa.alphabet, new_delta, full_dfa.initial_state, new_final_states)
     return reduce_dfa(new_dfa)
 
